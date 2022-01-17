@@ -28,10 +28,7 @@ class CustomLabels extends StatelessWidget {
         ),
         SizedBox(height: heightEspacing),
         GestureDetector(
-          onTap: () {
-            Navigator.pushReplacementNamed(context, routeTwo);
-            print('tap');
-          },
+          onTap: () => Navigator.pushReplacementNamed(context, routeTwo),
           child: Text(
             textTwo,
             style: TextStyle(
