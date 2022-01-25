@@ -1,7 +1,12 @@
-import 'package:chat_app/widgets/boton_azul.dart';
+import 'package:chat_app/utils/show_alert.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
+/** Services */
+import 'package:chat_app/services/auth_service.dart';
+
 /** Custom Widgets */
+import 'package:chat_app/widgets/boton_azul.dart';
 import 'package:chat_app/widgets/custom_logo.dart';
 import 'package:chat_app/widgets/custom_labels.dart';
 import 'package:chat_app/widgets/custom_input.dart';
@@ -53,6 +58,8 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       margin: const EdgeInsets.only(top: 40),
       padding: const EdgeInsets.symmetric(horizontal: 50),
@@ -72,10 +79,24 @@ class __FormState extends State<_Form> {
           ),
 
           // TODO: Crear oton
-          BotonAzul(onPressed: () {
-            print(emailCtrl.text);
-            print(passCtrl.text);
-          })
+          BotonAzul(
+            onPressed: authService.autenticando
+                ? null
+                : () async {
+                    FocusScope.of(context).unfocus();
+
+                    final loginOk = await authService.login(
+                        emailCtrl.text.trim(), passCtrl.text.trim());
+                    if (loginOk) {
+                      // TODO: Conectar a nuestro sockert server
+                      Navigator.pushReplacementNamed(context, 'usuarios');
+                    } else {
+                      // Mostrar alerta
+                      showSnackBar(
+                          context, 'Las credenciales no son correctas');
+                    }
+                  },
+          )
         ],
       ),
     );
