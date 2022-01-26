@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 /** Services */
 import 'package:chat_app/services/auth_service.dart';
+import 'package:chat_app/services/socket_service.dart';
 
 /** Utils */
 import 'package:chat_app/utils/show_alert.dart';
@@ -65,6 +66,7 @@ class __FormState extends State<_Form> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
+    final socketService = Provider.of<SocketService>(context);
 
     return Container(
       margin: const EdgeInsets.only(top: 40),
@@ -104,7 +106,7 @@ class __FormState extends State<_Form> {
                     );
 
                     if (registroOk == true) {
-                      // TODO: Conectar a nuestro sockert server
+                      socketService.connect();
                       Navigator.pushReplacementNamed(context, 'usuarios');
                     } else {
                       // Mostrar alerta
