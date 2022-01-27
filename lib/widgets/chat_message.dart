@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_file.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 import 'package:chat_app/services/auth_service.dart';
 
 class ChatMessage extends StatelessWidget {
   final String uid;
   final String texto;
+  final DateTime dateTime;
   final AnimationController animationController;
 
   const ChatMessage({
     Key? key,
     required this.uid,
     required this.texto,
+    required this.dateTime,
     required this.animationController,
   }) : super(key: key);
 
@@ -33,35 +37,61 @@ class ChatMessage extends StatelessWidget {
   }
 
   Widget _myMessage() {
+    String timeMessage = DateFormat('hh:mm a').format(dateTime);
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
         padding: const EdgeInsets.all(8.0),
-        margin: EdgeInsets.only(
+        margin: const EdgeInsets.only(
           bottom: 5,
           right: 5,
           left: 50,
         ),
-        child: Text(texto, style: const TextStyle(color: Colors.white)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(texto, style: const TextStyle(color: Colors.black87)),
+            const SizedBox(height: 5),
+            Text(
+              timeMessage,
+              style: const TextStyle(color: Colors.black45, fontSize: 10),
+            ),
+          ],
+        ),
         decoration: BoxDecoration(
-            color: Color(0xff4D9EF6), borderRadius: BorderRadius.circular(20)),
+          color: Colors.yellow[50],
+          borderRadius: BorderRadius.circular(20),
+        ),
       ),
     );
   }
 
   Widget _notMyMessage() {
+    String timeMessage = DateFormat('hh:mm a').format(dateTime);
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         padding: const EdgeInsets.all(8.0),
-        margin: EdgeInsets.only(
+        margin: const EdgeInsets.only(
           bottom: 5,
           right: 50,
           left: 5,
         ),
-        child: Text(texto, style: const TextStyle(color: Colors.black87)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(texto, style: const TextStyle(color: Colors.black87)),
+            const SizedBox(height: 5),
+            Text(
+              timeMessage,
+              style: const TextStyle(color: Colors.black45, fontSize: 10),
+            ),
+          ],
+        ),
         decoration: BoxDecoration(
-            color: Color(0xffE4E5E8), borderRadius: BorderRadius.circular(20)),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
       ),
     );
   }

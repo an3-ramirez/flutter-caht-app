@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 
 /** Models */
 import 'package:chat_app/models/mensajes_response.dart';
@@ -32,6 +33,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   final List<ChatMessage> _messages = [];
 
   bool _estaEscribiendo = false;
+  bool emojiShowing = false;
 
   @override
   void initState() {
@@ -52,6 +54,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       (m) => ChatMessage(
         uid: m.de,
         texto: m.mensaje,
+        dateTime: m.createdAt,
         animationController: AnimationController(
           vsync: this,
           duration: const Duration(milliseconds: 0),
@@ -68,6 +71,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     ChatMessage message = ChatMessage(
       uid: data['de'],
       texto: data['mensaje'],
+      dateTime: data['createdAt'],
       animationController: AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 300),
@@ -79,31 +83,58 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     message.animationController.forward();
   }
 
+  _onEmojiSelected(Emoji emoji) {
+    _textController
+      ..text += emoji.emoji
+      ..selection = TextSelection.fromPosition(
+        TextPosition(offset: _textController.text.length),
+      );
+  }
+
+  _onBackspacePressed() {
+    _textController
+      ..text = _textController.text.characters.skipLast(1).toString()
+      ..selection = TextSelection.fromPosition(
+        TextPosition(offset: _textController.text.length),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     final usuarioFrom = chatService.usuarioFrom;
 
     return Scaffold(
       appBar: AppBar(
-        title: Column(
+        backgroundColor: const Color(0xff128C7E),
+        centerTitle: false,
+        titleSpacing: 0,
+        title: Row(
           children: [
             CircleAvatar(
-              child: Text(usuarioFrom.nombre.substring(0, 2),
-                  style: const TextStyle(fontSize: 12)),
+              //minRadius: 40.0,
+              child: Text(
+                usuarioFrom.nombre.substring(0, 2),
+                style: const TextStyle(fontSize: 15),
+              ),
               backgroundColor: Colors.blue[100],
               maxRadius: 14,
             ),
-            const SizedBox(height: 3),
+            const SizedBox(width: 8),
             Text(
               usuarioFrom.nombre,
-              style: const TextStyle(color: Colors.black87, fontSize: 12),
+              style: const TextStyle(color: Colors.white, fontSize: 18),
             )
           ],
         ),
-        centerTitle: true,
         elevation: 1,
       ),
       body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/whatsAppBackgroundImg.png"),
+            fit: BoxFit.cover,
+          ),
+        ),
         child: Column(
           children: <Widget>[
             Flexible(
@@ -114,11 +145,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                 reverse: true,
               ),
             ),
-            const Divider(height: 1),
             Container(
-              color: Colors.white,
+              color: Colors.transparent,
               child: _inputChat(),
-            )
+            ),
+            _emojiPicker(),
           ],
         ),
       ),
@@ -128,52 +159,64 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   Widget _inputChat() {
     return SafeArea(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8.0),
+        margin: const EdgeInsets.all(2.0),
         child: Row(
           children: [
             Flexible(
-              child: TextField(
-                controller: _textController,
-                onSubmitted: _handleSubmit,
-                onChanged: (String texto) {
-                  setState(() {
-                    if (texto.trim().isNotEmpty) {
-                      _estaEscribiendo = true;
-                    } else {
-                      _estaEscribiendo = false;
-                    }
-                  });
-                },
-                decoration:
-                    const InputDecoration.collapsed(hintText: 'Enviar ensaje'),
-                focusNode: _focusNode,
-              ),
-            ),
-            //Boton enviar
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Platform.isIOS
-                  ? CupertinoButton(
-                      child: const Text('Enviar'),
-                      onPressed: _estaEscribiendo
-                          ? () => _handleSubmit(_textController.text.trim())
-                          : null,
-                    )
-                  : Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: IconTheme(
-                        data: IconThemeData(color: Colors.blue[400]),
+              child: Container(
+                  margin: const EdgeInsets.all(3),
+                  //padding: const EdgeInsets.all(15),
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Stack(
+                    children: [
+                      Material(
+                        color: Colors.transparent,
                         child: IconButton(
-                          highlightColor: Colors.transparent,
-                          splashColor: Colors.transparent,
-                          icon: const Icon(Icons.send),
-                          onPressed: _estaEscribiendo
-                              ? () => _handleSubmit(_textController.text.trim())
-                              : null,
+                          onPressed: () {
+                            setState(() {
+                              emojiShowing = !emojiShowing;
+                            });
+                          },
+                          icon: Icon(
+                            emojiShowing
+                                ? Icons.keyboard
+                                : Icons.emoji_emotions,
+                            color: Colors.black45,
+                          ),
                         ),
                       ),
-                    ),
-            )
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          top: 15,
+                          bottom: 15,
+                          left: 45,
+                          right: 15,
+                        ),
+                        child: TextField(
+                          controller: _textController,
+                          onSubmitted: _handleSubmit,
+                          onChanged: (String texto) {
+                            setState(() {
+                              if (texto.trim().isNotEmpty) {
+                                _estaEscribiendo = true;
+                              } else {
+                                _estaEscribiendo = false;
+                              }
+                            });
+                          },
+                          decoration: const InputDecoration.collapsed(
+                              hintText: 'Mensaje'),
+                          focusNode: _focusNode,
+                        ),
+                      ),
+                    ],
+                  )),
+            ),
+            _btnSend(),
           ],
         ),
       ),
@@ -189,6 +232,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     final newMessage = ChatMessage(
       uid: authService.usuario.uid,
       texto: texto,
+      dateTime: DateTime.now(),
       animationController: AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 300),
@@ -214,5 +258,78 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     }
     socketService.socket.off('mensaje-personal');
     super.dispose();
+  }
+
+  Widget _emojiPicker() {
+    return Offstage(
+      offstage: !emojiShowing,
+      child: SizedBox(
+        height: 250,
+        child: EmojiPicker(
+          onEmojiSelected: (Category category, Emoji emoji) {
+            _onEmojiSelected(emoji);
+          },
+          onBackspacePressed: _onBackspacePressed,
+          config: Config(
+              columns: 7,
+              // Issue: https://github.com/flutter/flutter/issues/28894
+              emojiSizeMax: 32 * (Platform.isIOS ? 1.30 : 1.0),
+              verticalSpacing: 0,
+              horizontalSpacing: 0,
+              initCategory: Category.RECENT,
+              bgColor: const Color(0xFFF2F2F2),
+              indicatorColor: Colors.blue,
+              iconColor: Colors.grey,
+              iconColorSelected: Colors.blue,
+              progressIndicatorColor: Colors.blue,
+              backspaceColor: Colors.blue,
+              skinToneDialogBgColor: Colors.white,
+              skinToneIndicatorColor: Colors.grey,
+              enableSkinTones: true,
+              showRecentsTab: true,
+              recentsLimit: 28,
+              noRecentsText: 'No Recents',
+              noRecentsStyle:
+                  const TextStyle(fontSize: 20, color: Colors.black26),
+              tabIndicatorAnimDuration: kTabScrollDuration,
+              categoryIcons: const CategoryIcons(),
+              buttonMode: ButtonMode.MATERIAL),
+        ),
+      ),
+    );
+  }
+
+  Widget _btnSend() {
+    return //Boton enviar
+        Container(
+      height: 50,
+      width: 50,
+      decoration: BoxDecoration(
+        color: const Color(0xff128C7E),
+        borderRadius: BorderRadius.circular(50),
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: Platform.isIOS
+          ? CupertinoButton(
+              child: const Text('Enviar'),
+              onPressed: _estaEscribiendo
+                  ? () => _handleSubmit(_textController.text.trim())
+                  : null,
+            )
+          : Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: IconTheme(
+                data: IconThemeData(color: Colors.blue[400]),
+                child: IconButton(
+                  highlightColor: Colors.transparent,
+                  splashColor: Colors.transparent,
+                  icon: const Icon(Icons.send, color: Colors.white),
+                  onPressed: _estaEscribiendo
+                      ? () => _handleSubmit(_textController.text.trim())
+                      : null,
+                ),
+              ),
+            ),
+    );
   }
 }

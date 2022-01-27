@@ -51,8 +51,8 @@ class Mensaje {
         de: json["de"],
         para: json["para"],
         mensaje: json["mensaje"],
-        createdAt: DateTime.parse(json["createdAt"]),
-        updatedAt: DateTime.parse(json["updatedAt"]),
+        createdAt: DateTime.parse(json["createdAt"]).toLocal(),
+        updatedAt: DateTime.parse(json["updatedAt"]).toLocal(),
       );
 
   Map<String, dynamic> toJson() => {

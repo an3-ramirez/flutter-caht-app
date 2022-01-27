@@ -41,26 +41,26 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color(0xff128C7E),
         title: Text(
           usuario.nombre,
-          style: const TextStyle(color: Colors.black54),
+          style: const TextStyle(color: Colors.white),
         ),
         elevation: 1,
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.exit_to_app, color: Colors.black87),
-          onPressed: () {
-            socketService.disconnect();
-            Navigator.pushReplacementNamed(context, 'login');
-            AuthService.deleteToken();
-          },
-        ),
         actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () {
+              socketService.disconnect();
+              Navigator.pushReplacementNamed(context, 'login');
+              AuthService.deleteToken();
+            },
+          ),
           Container(
             margin: const EdgeInsets.only(right: 10),
             child: (socketService.serverStatus == ServerStatus.Online)
-                ? Icon(Icons.check_circle, color: Colors.blue[400])
-                : const Icon(Icons.offline_bolt, color: Colors.red),
+                ? const Icon(Icons.check_circle, color: Colors.yellow)
+                : const Icon(Icons.offline_bolt, color: Colors.grey),
           )
         ],
       ),
